@@ -131,7 +131,7 @@ export default async function PostPage({ params }: Props) {
                 }}
               >
                 {tags.map((tag) => (
-                  <TagBadge key={tag.id} tag={tag} />
+                  <TagBadge key={tag.id} tag={tag} linked />
                 ))}
               </div>
             )}

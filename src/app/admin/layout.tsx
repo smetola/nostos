@@ -48,10 +48,33 @@ export default async function AdminLayout({
               ADMIN
             </span>
           </Link>
-          <nav className="header-nav">
+          <nav className="header-nav" style={{ gap: "var(--space-1)" }}>
             <Link href="/" className="nav-link" style={{ fontSize: "var(--text-xs)" }}>
               Ver web →
             </Link>
+            <form action={async () => {
+              "use server";
+              const { createClient } = await import("@/lib/supabase/server");
+              const { redirect } = await import("next/navigation");
+              const supabase = await createClient();
+              await supabase.auth.signOut();
+              redirect("/");
+            }}>
+              <button
+                type="submit"
+                className="nav-link"
+                style={{
+                  fontSize: "var(--text-xs)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  color: "var(--accent-rose)",
+                }}
+              >
+                Salir
+              </button>
+            </form>
           </nav>
         </div>
       </header>

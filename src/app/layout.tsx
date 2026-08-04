@@ -41,6 +41,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Nostos",
+              description:
+                "Investigaciones, reflexiones y apuntes personales. Un jardín digital.",
+              url: process.env.NEXT_PUBLIC_SITE_URL || "https://nostos.vercel.app",
+            }),
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

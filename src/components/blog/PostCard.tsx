@@ -37,7 +37,7 @@ export function PostCard({ post, showCategory = true }: PostCardProps) {
       {post.tags && post.tags.length > 0 && (
         <div className="post-card-tags">
           {post.tags.map((tag) => (
-            <TagBadge key={tag.id} tag={tag} />
+            <TagBadge key={tag.id} tag={tag} linked />
           ))}
         </div>
       )}
