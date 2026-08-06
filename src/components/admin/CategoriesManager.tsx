@@ -5,6 +5,8 @@ import { createCategory, updateCategory, deleteCategory } from "@/lib/actions/ca
 import type { Category } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
+import EmojiPicker from "@/components/ui/EmojiPicker";
+
 interface Props {
   categories: Category[];
 }
@@ -106,12 +108,11 @@ export default function CategoriesManager({ categories }: Props) {
           </div>
           <div style={{ display: "flex", gap: "var(--space-4)" }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Emoji</label>
-              <input
+              <label className="form-label">Emoji Icono</label>
+              <EmojiPicker
+                key={editing?.id ?? "new"}
                 name="icon_emoji"
-                className="form-input"
-                defaultValue={editing?.icon_emoji ?? "📁"}
-                placeholder="📁"
+                value={editing?.icon_emoji ?? "📁"}
               />
             </div>
             <div className="form-group" style={{ flex: 1 }}>

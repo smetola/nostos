@@ -85,11 +85,10 @@ export default async function TimelinePage() {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-state-icon">🌱</div>
-              <div className="empty-state-title">El jardín está creciendo</div>
+              <div className="empty-state-icon">📝</div>
+              <div className="empty-state-title">No hay publicaciones todavía</div>
               <p className="empty-state-text">
-                Las publicaciones aparecerán aquí cuando se añadan las primeras
-                semillas.
+                Las publicaciones aparecerán aquí cuando se añadan los primeros artículos.
               </p>
             </div>
           )}

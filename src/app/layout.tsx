@@ -3,14 +3,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Nostos — Jardín Digital",
+    default: "Nostos",
     template: "%s | Nostos",
   },
   description:
-    "Investigaciones, reflexiones y apuntes personales. Un jardín digital donde explorar ideas sobre filosofía, salud, geopolítica y más.",
+    "Investigaciones, reflexiones y apuntes personales donde explorar ideas sobre filosofía, salud, geopolítica y más.",
   keywords: [
     "blog personal",
-    "jardín digital",
     "filosofía",
     "salud",
     "geopolítica",
@@ -21,7 +20,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_ES",
     siteName: "Nostos",
-    title: "Nostos — Jardín Digital",
+    title: "Nostos",
     description:
       "Investigaciones, reflexiones y apuntes personales sobre filosofía, salud, geopolítica y más.",
   },
@@ -52,7 +51,7 @@ export default function RootLayout({
               "@type": "WebSite",
               name: "Nostos",
               description:
-                "Investigaciones, reflexiones y apuntes personales. Un jardín digital.",
+                "Investigaciones, reflexiones y apuntes personales.",
               url: process.env.NEXT_PUBLIC_SITE_URL || "https://nostos.vercel.app",
             }),
           }}

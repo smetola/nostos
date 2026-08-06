@@ -45,8 +45,7 @@ export default function NotFound() {
           lineHeight: 1.6,
         }}
       >
-        Este rincón del jardín aún no tiene camino. Quizá se haya perdido entre
-        las estrellas.
+        Esta página aún no existe. Quizá se haya perdido entre las estrellas.
       </p>
       <div style={{ display: "flex", gap: "var(--space-3)" }}>
         <Link href="/" className="btn btn-primary">

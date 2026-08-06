@@ -42,8 +42,7 @@ export function HomeContent({
             <section className="timeline-header animate-fade-in">
               <h1>Nostos</h1>
               <p>
-                Investigaciones, reflexiones y apuntes personales. Un jardín
-                digital donde explorar ideas.
+                Investigaciones, reflexiones y apuntes personales donde explorar ideas.
               </p>
             </section>
 
