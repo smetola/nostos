@@ -2,6 +2,8 @@
 // NOSTOS — Core Data Types
 // ============================================
 
+export type Visibility = 'public' | 'private' | 'unlisted';
+
 export interface Category {
   id: string;
   name: string;
@@ -11,7 +13,7 @@ export interface Category {
   color_hex: string;
   position_x: number;
   position_y: number;
-  is_private: boolean;
+  visibility: Visibility;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -25,7 +27,7 @@ export interface Topic {
   description: string | null;
   position_x: number;
   position_y: number;
-  is_private: boolean;
+  visibility: Visibility;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -41,7 +43,7 @@ export interface Post {
   slug: string;
   content_md: string;
   excerpt: string | null;
-  is_private: boolean;
+  visibility: Visibility;
   is_featured: boolean;
   published_at: string;
   created_at: string;

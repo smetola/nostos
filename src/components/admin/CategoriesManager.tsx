@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createCategory, updateCategory, deleteCategory } from "@/lib/actions/categories";
-import type { Category } from "@/lib/types";
+import type { Category, Visibility } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 import EmojiPicker from "@/components/ui/EmojiPicker";
@@ -16,6 +16,7 @@ export default function CategoriesManager({ categories }: Props) {
   const [editing, setEditing] = useState<Category | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [visibility, setVisibility] = useState<Visibility>("public");
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -23,6 +24,7 @@ export default function CategoriesManager({ categories }: Props) {
     setLoading(true);
     setMessage("");
     const formData = new FormData(e.currentTarget);
+    formData.set("visibility", visibility);
 
     const result = editing
       ? await updateCategory(editing.id, formData)
@@ -53,6 +55,7 @@ export default function CategoriesManager({ categories }: Props) {
 
   function startEdit(cat: Category) {
     setEditing(cat);
+    setVisibility(cat.visibility);
     setShowForm(true);
   }
 
@@ -64,6 +67,7 @@ export default function CategoriesManager({ categories }: Props) {
           className="btn btn-primary"
           onClick={() => {
             setEditing(null);
+            setVisibility("public");
             setShowForm(!showForm);
           }}
         >
@@ -127,24 +131,30 @@ export default function CategoriesManager({ categories }: Props) {
             </div>
           </div>
           <div className="form-group">
-            <label className="toggle-wrapper">
-              <input type="hidden" name="is_private" value="false" />
-              <input
-                type="checkbox"
-                name="is_private"
-                value="true"
-                defaultChecked={editing?.is_private ?? false}
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const hidden = e.target.previousSibling as HTMLInputElement;
-                  hidden.disabled = e.target.checked;
-                }}
-              />
-              <div className="toggle-track">
-                <div className="toggle-thumb" />
-              </div>
-              <span className="toggle-label">Categoría privada</span>
-            </label>
+            <label className="form-label">Visibilidad</label>
+            <div className="visibility-selector">
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "public" ? "active" : ""}`}
+                onClick={() => setVisibility("public")}
+              >
+                🌐 Público
+              </button>
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "unlisted" ? "active" : ""}`}
+                onClick={() => setVisibility("unlisted")}
+              >
+                🔗 Oculto
+              </button>
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "private" ? "active" : ""}`}
+                onClick={() => setVisibility("private")}
+              >
+                🔒 Privado
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? "Guardando…" : editing ? "Actualizar" : "Crear categoría"}
@@ -166,7 +176,8 @@ export default function CategoriesManager({ categories }: Props) {
                 <div className="topic-item-name" style={{ color: cat.color_hex }}>
                   {cat.name}
                 </div>
-                {cat.is_private && <span className="private-badge">🔒 Privado</span>}
+                {cat.visibility === "private" && <span className="private-badge">🔒 Privado</span>}
+                {cat.visibility === "unlisted" && <span className="unlisted-badge">🔗 Oculto</span>}
               </div>
             </div>
             <div style={{ display: "flex", gap: "var(--space-2)" }}>

@@ -25,7 +25,8 @@ export function PostCard({ post, showCategory = true }: PostCardProps) {
         {showCategory && category && (
           <CategoryPill category={category} />
         )}
-        {post.is_private && <span className="private-badge">🔒 Privado</span>}
+        {post.visibility === "private" && <span className="private-badge">🔒 Privado</span>}
+        {post.visibility === "unlisted" && <span className="unlisted-badge">🔗 Oculto</span>}
       </div>
 
       <h3 className="post-card-title">{post.title}</h3>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createTopic, updateTopic, deleteTopic } from "@/lib/actions/topics";
-import type { Topic, Category } from "@/lib/types";
+import type { Topic, Category, Visibility } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -15,6 +15,7 @@ export default function TopicsManager({ topics, categories }: Props) {
   const [editing, setEditing] = useState<(Topic & { category: Category }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [visibility, setVisibility] = useState<Visibility>("public");
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -22,6 +23,7 @@ export default function TopicsManager({ topics, categories }: Props) {
     setLoading(true);
     setMessage("");
     const formData = new FormData(e.currentTarget);
+    formData.set("visibility", visibility);
 
     const result = editing
       ? await updateTopic(editing.id, formData)
@@ -58,6 +60,7 @@ export default function TopicsManager({ topics, categories }: Props) {
           className="btn btn-primary"
           onClick={() => {
             setEditing(null);
+            setVisibility("public");
             setShowForm(!showForm);
           }}
         >
@@ -116,24 +119,30 @@ export default function TopicsManager({ topics, categories }: Props) {
             />
           </div>
           <div className="form-group">
-            <label className="toggle-wrapper">
-              <input type="hidden" name="is_private" value="false" />
-              <input
-                type="checkbox"
-                name="is_private"
-                value="true"
-                defaultChecked={editing?.is_private ?? false}
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const hidden = e.target.previousSibling as HTMLInputElement;
-                  hidden.disabled = e.target.checked;
-                }}
-              />
-              <div className="toggle-track">
-                <div className="toggle-thumb" />
-              </div>
-              <span className="toggle-label">Tema privado</span>
-            </label>
+            <label className="form-label">Visibilidad</label>
+            <div className="visibility-selector">
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "public" ? "active" : ""}`}
+                onClick={() => setVisibility("public")}
+              >
+                🌐 Público
+              </button>
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "unlisted" ? "active" : ""}`}
+                onClick={() => setVisibility("unlisted")}
+              >
+                🔗 Oculto
+              </button>
+              <button
+                type="button"
+                className={`visibility-option ${visibility === "private" ? "active" : ""}`}
+                onClick={() => setVisibility("private")}
+              >
+                🔒 Privado
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? "Guardando…" : editing ? "Actualizar" : "Crear tema"}
@@ -159,9 +168,14 @@ export default function TopicsManager({ topics, categories }: Props) {
               </div>
               <div className="topic-item-name">
                 {topic.name}
-                {topic.is_private && (
+                {topic.visibility === "private" && (
                   <span className="private-badge" style={{ marginLeft: "var(--space-2)" }}>
                     🔒
+                  </span>
+                )}
+                {topic.visibility === "unlisted" && (
+                  <span className="unlisted-badge" style={{ marginLeft: "var(--space-2)" }}>
+                    🔗
                   </span>
                 )}
               </div>
@@ -171,6 +185,7 @@ export default function TopicsManager({ topics, categories }: Props) {
                 className="btn btn-ghost btn-icon"
                 onClick={() => {
                   setEditing(topic);
+                  setVisibility(topic.visibility);
                   setShowForm(true);
                 }}
               >

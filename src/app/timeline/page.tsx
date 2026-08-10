@@ -26,14 +26,14 @@ export default async function TimelinePage() {
       tags:post_tags(tag:tags(*))
     `
     )
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("published_at", { ascending: false });
 
   // Fetch categories for filters
   const { data: categories } = await supabase
     .from("categories")
     .select("*")
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
   // Transform posts

@@ -19,7 +19,7 @@ export default async function HomePage() {
       tags:post_tags(tag:tags(*))
     `
     )
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("published_at", { ascending: false })
     .limit(10);
 
@@ -27,14 +27,14 @@ export default async function HomePage() {
   const { data: categories } = await supabase
     .from("categories")
     .select("*, topics(count)")
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
   // Fetch categories with full topics (for map view)
   const { data: categoriesWithTopics } = await supabase
     .from("categories")
     .select("*, topics(*)")
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
   // Transform posts to flatten tag structure

@@ -113,8 +113,11 @@ export default async function PostPage({ params }: Props) {
                 {formatDateFull(post.published_at)}
               </time>
               <CategoryPill category={category} />
-              {post.is_private && (
+              {post.visibility === "private" && (
                 <span className="private-badge">🔒 Privado</span>
+              )}
+              {post.visibility === "unlisted" && (
+                <span className="unlisted-badge">🔗 Oculto</span>
               )}
             </div>
 

@@ -78,7 +78,7 @@ export function SearchModal({
           )
         `
         )
-        .eq("is_private", false)
+        .eq("visibility", "public")
         .or(
           `title.ilike.%${searchQuery}%,content_md.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`
         )

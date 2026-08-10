@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createPost, updatePost } from "@/lib/actions/posts";
-import type { Topic, Category, Tag, Post } from "@/lib/types";
+import type { Topic, Category, Tag, Post, Visibility } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
 
@@ -20,7 +20,7 @@ export default function PostEditor({ topics, tags, existingPost }: Props) {
   const [selectedTags, setSelectedTags] = useState<string[]>(
     existingPost?.tags?.map((t) => t.id) ?? []
   );
-  const [isPrivate, setIsPrivate] = useState(existingPost?.is_private ?? false);
+  const [visibility, setVisibility] = useState<Visibility>(existingPost?.visibility ?? "public");
   const [isFeatured, setIsFeatured] = useState(existingPost?.is_featured ?? false);
   const router = useRouter();
 
@@ -32,7 +32,7 @@ export default function PostEditor({ topics, tags, existingPost }: Props) {
     const formData = new FormData(e.currentTarget);
     formData.set("content_md", content);
     formData.set("tag_ids", selectedTags.join(","));
-    formData.set("is_private", isPrivate.toString());
+    formData.set("visibility", visibility);
     formData.set("is_featured", isFeatured.toString());
 
     const result = existingPost
@@ -202,21 +202,42 @@ export default function PostEditor({ topics, tags, existingPost }: Props) {
             </div>
           )}
 
-          {/* Privacy & Featured */}
+          {/* Visibility & Featured */}
           <div
             style={{
               display: "flex",
               gap: "var(--space-6)",
               marginBottom: "var(--space-6)",
               flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
-            <label className="toggle-wrapper" onClick={() => setIsPrivate(!isPrivate)}>
-              <div className={`toggle-track ${isPrivate ? "active" : ""}`}>
-                <div className="toggle-thumb" />
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ marginBottom: "var(--space-2)" }}>Visibilidad</label>
+              <div className="visibility-selector">
+                <button
+                  type="button"
+                  className={`visibility-option ${visibility === "public" ? "active" : ""}`}
+                  onClick={() => setVisibility("public")}
+                >
+                  🌐 Público
+                </button>
+                <button
+                  type="button"
+                  className={`visibility-option ${visibility === "unlisted" ? "active" : ""}`}
+                  onClick={() => setVisibility("unlisted")}
+                >
+                  🔗 Oculto
+                </button>
+                <button
+                  type="button"
+                  className={`visibility-option ${visibility === "private" ? "active" : ""}`}
+                  onClick={() => setVisibility("private")}
+                >
+                  🔒 Privado
+                </button>
               </div>
-              <span className="toggle-label">🔒 Privado</span>
-            </label>
+            </div>
 
             <label className="toggle-wrapper" onClick={() => setIsFeatured(!isFeatured)}>
               <div className={`toggle-track ${isFeatured ? "active" : ""}`}>

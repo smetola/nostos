@@ -3,20 +3,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/utils";
+import type { Visibility } from "@/lib/types";
 
 export async function createTopic(formData: FormData) {
   const supabase = await createClient();
   const name = formData.get("name") as string;
   const category_id = formData.get("category_id") as string;
   const description = formData.get("description") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
 
   const { error } = await supabase.from("topics").insert({
     name,
     slug: slugify(name),
     category_id,
     description: description || null,
-    is_private,
+    visibility,
   });
 
   if (error) return { error: error.message };
@@ -30,7 +31,7 @@ export async function updateTopic(id: string, formData: FormData) {
   const name = formData.get("name") as string;
   const category_id = formData.get("category_id") as string;
   const description = formData.get("description") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
 
   const { error } = await supabase
     .from("topics")
@@ -39,7 +40,7 @@ export async function updateTopic(id: string, formData: FormData) {
       slug: slugify(name),
       category_id,
       description: description || null,
-      is_private,
+      visibility,
     })
     .eq("id", id);
 

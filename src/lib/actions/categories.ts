@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/utils";
+import type { Visibility } from "@/lib/types";
 
 export async function createCategory(formData: FormData) {
   const supabase = await createClient();
@@ -10,7 +11,7 @@ export async function createCategory(formData: FormData) {
   const description = formData.get("description") as string;
   const icon_emoji = formData.get("icon_emoji") as string;
   const color_hex = formData.get("color_hex") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
 
   const { error } = await supabase.from("categories").insert({
     name,
@@ -18,7 +19,7 @@ export async function createCategory(formData: FormData) {
     description: description || null,
     icon_emoji: icon_emoji || "📁",
     color_hex: color_hex || "#6366f1",
-    is_private,
+    visibility,
   });
 
   if (error) return { error: error.message };
@@ -33,7 +34,7 @@ export async function updateCategory(id: string, formData: FormData) {
   const description = formData.get("description") as string;
   const icon_emoji = formData.get("icon_emoji") as string;
   const color_hex = formData.get("color_hex") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
 
   const { error } = await supabase
     .from("categories")
@@ -43,7 +44,7 @@ export async function updateCategory(id: string, formData: FormData) {
       description: description || null,
       icon_emoji: icon_emoji || "📁",
       color_hex: color_hex || "#6366f1",
-      is_private,
+      visibility,
     })
     .eq("id", id);
 

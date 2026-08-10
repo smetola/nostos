@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { deletePost, togglePostPrivacy } from "@/lib/actions/posts";
+import { deletePost, setPostVisibility } from "@/lib/actions/posts";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Category } from "@/lib/types";
+import type { Category, Visibility } from "@/lib/types";
 
 interface PostItem {
   id: string;
   title: string;
   slug: string;
-  is_private: boolean;
+  visibility: Visibility;
   is_featured: boolean;
   published_at: string;
   topic: {
@@ -25,6 +25,14 @@ interface Props {
   posts: PostItem[];
 }
 
+const VISIBILITY_CYCLE: Visibility[] = ["public", "unlisted", "private"];
+
+const VISIBILITY_CONFIG: Record<Visibility, { emoji: string; label: string; badgeClass: string }> = {
+  public: { emoji: "🌐", label: "Público", badgeClass: "" },
+  unlisted: { emoji: "🔗", label: "Oculto", badgeClass: "unlisted-badge" },
+  private: { emoji: "🔒", label: "Privado", badgeClass: "private-badge" },
+};
+
 export function PostsListManager({ posts }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
@@ -37,80 +45,89 @@ export function PostsListManager({ posts }: Props) {
     setLoading(null);
   }
 
-  async function handleTogglePrivacy(id: string, currentPrivate: boolean) {
+  async function handleCycleVisibility(id: string, current: Visibility) {
+    const currentIdx = VISIBILITY_CYCLE.indexOf(current);
+    const next = VISIBILITY_CYCLE[(currentIdx + 1) % VISIBILITY_CYCLE.length];
     setLoading(id);
-    await togglePostPrivacy(id, !currentPrivate);
+    await setPostVisibility(id, next);
     router.refresh();
     setLoading(null);
   }
 
   return (
     <div className="topic-list">
-      {posts.map((post) => (
-        <div key={post.id} className="topic-item" style={{ cursor: "default", flexWrap: "wrap", gap: "var(--space-3)" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: "var(--text-xs)",
-                color: post.topic?.category?.color_hex ?? "var(--text-muted)",
-                marginBottom: "2px",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                fontWeight: 600,
-              }}
-            >
-              {post.topic?.category?.icon_emoji} {post.topic?.category?.name} › {post.topic?.name}
+      {posts.map((post) => {
+        const vis = VISIBILITY_CONFIG[post.visibility] ?? VISIBILITY_CONFIG.public;
+        const nextIdx = (VISIBILITY_CYCLE.indexOf(post.visibility) + 1) % VISIBILITY_CYCLE.length;
+        const nextVis = VISIBILITY_CONFIG[VISIBILITY_CYCLE[nextIdx]];
+        return (
+          <div key={post.id} className="topic-item" style={{ cursor: "default", flexWrap: "wrap", gap: "var(--space-3)" }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: post.topic?.category?.color_hex ?? "var(--text-muted)",
+                  marginBottom: "2px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  fontWeight: 600,
+                }}
+              >
+                {post.topic?.category?.icon_emoji} {post.topic?.category?.name} › {post.topic?.name}
+              </div>
+              <div className="topic-item-name" style={{ wordBreak: "break-word" }}>
+                {post.title}
+              </div>
+              <div
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  marginTop: "2px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-2)",
+                  flexWrap: "wrap",
+                }}
+              >
+                <time>{formatDate(post.published_at)}</time>
+                {post.visibility !== "public" && (
+                  <span className={vis.badgeClass}>{vis.emoji} {vis.label}</span>
+                )}
+                {post.is_featured && (
+                  <span
+                    style={{
+                      color: "var(--accent-amber)",
+                      fontSize: "var(--text-xs)",
+                    }}
+                  >
+                    ⭐ Destacado
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="topic-item-name" style={{ wordBreak: "break-word" }}>
-              {post.title}
-            </div>
-            <div
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--text-muted)",
-                marginTop: "2px",
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-2)",
-                flexWrap: "wrap",
-              }}
-            >
-              <time>{formatDate(post.published_at)}</time>
-              {post.is_private && <span className="private-badge">🔒 Privado</span>}
-              {post.is_featured && (
-                <span
-                  style={{
-                    color: "var(--accent-amber)",
-                    fontSize: "var(--text-xs)",
-                  }}
-                >
-                  ⭐ Destacado
-                </span>
-              )}
+            <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => handleCycleVisibility(post.id, post.visibility)}
+                title={`Cambiar a ${nextVis.label}`}
+                disabled={loading === post.id}
+              >
+                {vis.emoji}
+              </button>
+              <Link href={`/admin/posts/${post.id}`} className="btn btn-ghost btn-icon">
+                ✏️
+              </Link>
+              <button
+                className="btn btn-danger btn-icon"
+                onClick={() => handleDelete(post.id)}
+                disabled={loading === post.id}
+              >
+                🗑️
+              </button>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={() => handleTogglePrivacy(post.id, post.is_private)}
-              title={post.is_private ? "Hacer público" : "Hacer privado"}
-              disabled={loading === post.id}
-            >
-              {post.is_private ? "👁️" : "🔒"}
-            </button>
-            <Link href={`/admin/posts/${post.id}`} className="btn btn-ghost btn-icon">
-              ✏️
-            </Link>
-            <button
-              className="btn btn-danger btn-icon"
-              onClick={() => handleDelete(post.id)}
-              disabled={loading === post.id}
-            >
-              🗑️
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       {posts.length === 0 && (
         <div className="empty-state">
           <div className="empty-state-icon">📝</div>

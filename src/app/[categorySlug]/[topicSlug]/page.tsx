@@ -70,7 +70,7 @@ export default async function TopicPage({ params }: Props) {
     `
     )
     .eq("topic_id", topic.id)
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("published_at", { ascending: false });
 
   const transformedPosts: (Post & { topic: { category: Category }; tags: Tag[] })[] =

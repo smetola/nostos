@@ -42,7 +42,7 @@ export default async function CategoryPage({ params }: Props) {
     .from("topics")
     .select("*, posts:posts(count)")
     .eq("category_id", category.id)
-    .eq("is_private", false)
+    .eq("visibility", "public")
     .order("sort_order", { ascending: true });
 
   return (

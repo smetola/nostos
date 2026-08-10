@@ -64,7 +64,7 @@ export default async function TagPage({ params }: Props) {
       `
       )
       .in("id", postIds)
-      .eq("is_private", false)
+      .eq("visibility", "public")
       .order("published_at", { ascending: false });
 
     posts = (rawPosts ?? []).map((post: Record<string, unknown>) => ({

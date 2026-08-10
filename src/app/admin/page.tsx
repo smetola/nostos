@@ -11,6 +11,7 @@ export default async function AdminDashboard() {
     { count: postsCount },
     { count: tagsCount },
     { count: privatePostsCount },
+    { count: unlistedPostsCount },
   ] = await Promise.all([
     supabase.from("categories").select("*", { count: "exact", head: true }),
     supabase.from("topics").select("*", { count: "exact", head: true }),
@@ -19,7 +20,11 @@ export default async function AdminDashboard() {
     supabase
       .from("posts")
       .select("*", { count: "exact", head: true })
-      .eq("is_private", true),
+      .eq("visibility", "private"),
+    supabase
+      .from("posts")
+      .select("*", { count: "exact", head: true })
+      .eq("visibility", "unlisted"),
   ]);
 
   const stats = [
@@ -28,6 +33,7 @@ export default async function AdminDashboard() {
     { label: "Posts", count: postsCount ?? 0, emoji: "📝", href: "/admin/posts" },
     { label: "Tags", count: tagsCount ?? 0, emoji: "🔖", href: "/admin/tags" },
     { label: "Privados", count: privatePostsCount ?? 0, emoji: "🔒", href: "/admin/posts" },
+    { label: "Ocultos", count: unlistedPostsCount ?? 0, emoji: "🔗", href: "/admin/posts" },
   ];
 
   return (

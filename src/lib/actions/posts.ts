@@ -3,13 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { slugify, generateExcerpt } from "@/lib/utils";
+import type { Visibility } from "@/lib/types";
 
 export async function createPost(formData: FormData) {
   const supabase = await createClient();
   const title = formData.get("title") as string;
   const topic_id = formData.get("topic_id") as string;
   const content_md = formData.get("content_md") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
   const is_featured = formData.get("is_featured") === "true";
   const tagIds = formData.get("tag_ids") as string;
   const published_at = (formData.get("published_at") as string) || new Date().toISOString();
@@ -23,7 +24,7 @@ export async function createPost(formData: FormData) {
       topic_id,
       content_md,
       excerpt: generateExcerpt(content_md),
-      is_private,
+      visibility,
       is_featured,
       published_at,
     })
@@ -58,7 +59,7 @@ export async function updatePost(id: string, formData: FormData) {
   const title = formData.get("title") as string;
   const topic_id = formData.get("topic_id") as string;
   const content_md = formData.get("content_md") as string;
-  const is_private = formData.get("is_private") === "true";
+  const visibility = (formData.get("visibility") as Visibility) || "public";
   const is_featured = formData.get("is_featured") === "true";
   const tagIds = formData.get("tag_ids") as string;
   const published_at = formData.get("published_at") as string;
@@ -69,7 +70,7 @@ export async function updatePost(id: string, formData: FormData) {
     topic_id,
     content_md,
     excerpt: generateExcerpt(content_md),
-    is_private,
+    visibility,
     is_featured,
   };
 
@@ -117,11 +118,11 @@ export async function deletePost(id: string) {
   return { success: true };
 }
 
-export async function togglePostPrivacy(id: string, isPrivate: boolean) {
+export async function setPostVisibility(id: string, visibility: Visibility) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("posts")
-    .update({ is_private: isPrivate })
+    .update({ visibility })
     .eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/");
