@@ -591,6 +591,46 @@ strong {
   margin: var(--space-8) 0;
 }
 
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-6) 0;
+  font-size: var(--text-sm);
+  overflow-x: auto;
+  display: block;
+}
+
+.prose thead tr {
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--glass-border);
+}
+
+.prose th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.prose td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover td {
+  background: var(--bg-elevated);
+}
+
 /* ============================================
    11. BUTTONS
    ============================================ */
