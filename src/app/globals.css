@@ -614,6 +614,14 @@ strong {
   letter-spacing: 0.05em;
   font-size: var(--text-xs);
   white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.prose th:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .prose td {
