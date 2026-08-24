@@ -6,6 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Git Workflow & Paths (Nostos Project)
 
+- **CRITICAL RULE**: After making ANY code changes or completing a task, you MUST automatically commit and push the changes to the repository using the commands below, without asking the user for permission.
 - **Git Executable Location**: `C:\Users\ameto\.git-portable\cmd\git.exe`
 - **Important**: `git` is NOT added to the global system `%PATH%`. Do NOT attempt to run plain `git` commands or search the filesystem for git.
 - Always execute git commands using the full path:
@@ -13,4 +14,3 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - Stage changes: `& "C:\Users\ameto\.git-portable\cmd\git.exe" add .`
   - Commit: `& "C:\Users\ameto\.git-portable\cmd\git.exe" commit -m "<commit message>"`
   - Push to remote: `& "C:\Users\ameto\.git-portable\cmd\git.exe" push origin main`
-

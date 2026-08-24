@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -67,7 +67,7 @@ function autoLayoutCategories(categories: CategoryWithTopics[]): CategoryWithTop
 
 export function InfiniteCanvas({ categories }: InfiniteCanvasProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [transformRef, setTransformRef] = useState<ReactZoomPanPinchRef | null>(null);
+  const transformComponentRef = useRef<ReactZoomPanPinchRef | null>(null);
 
   // Auto-layout if needed
   const layoutCategories = useMemo(
@@ -92,9 +92,9 @@ export function InfiniteCanvas({ categories }: InfiniteCanvasProps) {
       setActiveCategory((prev) => (prev === categoryId ? null : categoryId));
 
       // Smooth zoom to the category
-      if (transformRef) {
+      if (transformComponentRef.current) {
         const scale = 1.2;
-        transformRef.setTransform(
+        transformComponentRef.current.setTransform(
           -(x * scale) + window.innerWidth / 2,
           -(y * scale) + window.innerHeight / 2,
           scale,
@@ -103,21 +103,21 @@ export function InfiniteCanvas({ categories }: InfiniteCanvasProps) {
         );
       }
     },
-    [transformRef]
+    []
   );
 
   const handleZoomIn = useCallback(() => {
-    transformRef?.zoomIn(0.3, 200);
-  }, [transformRef]);
+    transformComponentRef.current?.zoomIn(0.3, 200);
+  }, []);
 
   const handleZoomOut = useCallback(() => {
-    transformRef?.zoomOut(0.3, 200);
-  }, [transformRef]);
+    transformComponentRef.current?.zoomOut(0.3, 200);
+  }, []);
 
   const handleReset = useCallback(() => {
-    transformRef?.resetTransform(400);
+    transformComponentRef.current?.resetTransform(400);
     setActiveCategory(null);
-  }, [transformRef]);
+  }, []);
 
   // Build connection lines data
   const connections = useMemo(() => {
@@ -166,7 +166,7 @@ export function InfiniteCanvas({ categories }: InfiniteCanvasProps) {
   return (
     <div className="map-container">
       <TransformWrapper
-        ref={(ref) => setTransformRef(ref)}
+        ref={transformComponentRef}
         initialScale={0.5}
         minScale={0.15}
         maxScale={3}
