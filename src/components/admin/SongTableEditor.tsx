@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface SongTableEditorProps {
   content: string;
@@ -22,10 +22,19 @@ const END_MARKER = "<!-- SONGS_TABLE_END -->";
 export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
   const [songs, setSongs] = useState<Song[]>([]);
   const [hasTable, setHasTable] = useState(false);
+  const isInternalChange = useRef(false);
 
-  // Parse markdown content when it changes (or initially)
+  // Form state for adding a new song
+  const [newSong, setNewSong] = useState<Song>({ id: "", name: "", url: "", artist: "", key: "", notes: "" });
+
+  // Parse markdown content when it changes externally
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+
     const startIndex = content.indexOf(START_MARKER);
     const endIndex = content.indexOf(END_MARKER);
 
@@ -57,7 +66,7 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
           }
 
           parsedSongs.push({
-            id: Math.random().toString(36).substring(2, 9),
+            id: `song-ext-${i}`, // stable key based on index
             name,
             url,
             artist: parts[1].trim(),
@@ -74,19 +83,26 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSongs([]);
     }
-  }, [content]); // Depend on content so if they undo in text area, it updates. But wait, if we edit in UI, we update content, which triggers this again. That's fine, it will stay synced.
+  }, [content]);
 
   const generateMarkdownTable = (currentSongs: Song[]) => {
+    if (currentSongs.length === 0) {
+      let md = `\n| Canción | Artista | Tono | Notas |\n`;
+      md += `|---------|---------|------|-------|\n`;
+      return md;
+    }
+
     let md = `\n| Canción | Artista | Tono | Notas |\n`;
     md += `|---------|---------|------|-------|\n`;
     currentSongs.forEach((song) => {
-      const songCell = song.url ? `[${song.name}](${song.url})` : song.name;
-      md += `| ${songCell} | ${song.artist} | ${song.key} | ${song.notes} |\n`;
+      const songCell = song.url ? `[${song.name}](${song.url})` : song.name || " ";
+      md += `| ${songCell} | ${song.artist || " "} | ${song.key || " "} | ${song.notes || " "} |\n`;
     });
     return md;
   };
 
   const saveToContent = (newSongs: Song[]) => {
+    isInternalChange.current = true;
     const startIndex = content.indexOf(START_MARKER);
     const endIndex = content.indexOf(END_MARKER);
 
@@ -101,21 +117,27 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
   };
 
   const insertTable = () => {
-    const defaultSongs: Song[] = [
-      { id: "1", name: "El último día", url: "https://lacuerda.net/share.php?t=mner0272", artist: "Maldita Nerea", key: "C0 Re", notes: "Capo 1" }
-    ];
-    const newTableMd = `\n\n${START_MARKER}${generateMarkdownTable(defaultSongs)}${END_MARKER}\n\n`;
+    isInternalChange.current = true;
+    const newTableMd = `\n\n${START_MARKER}${generateMarkdownTable([])}${END_MARKER}\n\n`;
+    setHasTable(true);
+    setSongs([]);
     onChange(content + newTableMd);
   };
 
-  const addSong = () => {
-    const newSongs = [...songs, { id: Math.random().toString(36).substring(2, 9), name: "", url: "", artist: "", key: "", notes: "" }];
-    saveToContent(newSongs);
+  const handleAddNewSong = () => {
+    if (!newSong.name) {
+      alert("El nombre de la canción es obligatorio");
+      return;
+    }
+    const newSongsList = [...songs, { ...newSong, id: `song-${Date.now()}` }];
+    setSongs(newSongsList);
+    saveToContent(newSongsList);
+    // Reset form
+    setNewSong({ id: "", name: "", url: "", artist: "", key: "", notes: "" });
   };
 
   const updateSong = (id: string, field: keyof Song, value: string) => {
     const newSongs = songs.map(s => s.id === id ? { ...s, [field]: value } : s);
-    // Optimistic update to prevent cursor jumping
     setSongs(newSongs);
     saveToContent(newSongs);
   };
@@ -123,6 +145,7 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
   const deleteSong = (id: string) => {
     if (confirm("¿Eliminar esta canción?")) {
       const newSongs = songs.filter(s => s.id !== id);
+      setSongs(newSongs);
       saveToContent(newSongs);
     }
   };
@@ -144,79 +167,120 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
 
   return (
     <div style={{ marginBottom: "var(--space-6)", padding: "var(--space-4)", background: "var(--surface-2)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-        <h3 style={{ fontSize: "var(--text-lg)", fontWeight: "600", margin: 0 }}>🎵 Tonalidades de Canciones</h3>
-        <button type="button" onClick={addSong} className="btn btn-primary btn-sm">
-          ➕ Añadir canción
+      <h3 style={{ fontSize: "var(--text-lg)", fontWeight: "600", margin: "0 0 var(--space-4) 0" }}>🎵 Tonalidades de Canciones</h3>
+
+      {/* Formulario para añadir nueva canción */}
+      <div style={{ marginBottom: "var(--space-4)", padding: "var(--space-3)", background: "var(--surface-3)", borderRadius: "var(--radius-md)" }}>
+        <h4 style={{ fontSize: "var(--text-sm)", fontWeight: "600", marginBottom: "var(--space-3)", marginTop: 0 }}>Añadir nueva canción</h4>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
+          <input
+            type="text"
+            className="form-input"
+            style={{ fontSize: "var(--text-sm)" }}
+            placeholder="Canción *"
+            value={newSong.name}
+            onChange={(e) => setNewSong({...newSong, name: e.target.value})}
+          />
+          <input
+            type="text"
+            className="form-input"
+            style={{ fontSize: "var(--text-sm)" }}
+            placeholder="URL (Opcional)"
+            value={newSong.url}
+            onChange={(e) => setNewSong({...newSong, url: e.target.value})}
+          />
+          <input
+            type="text"
+            className="form-input"
+            style={{ fontSize: "var(--text-sm)" }}
+            placeholder="Artista"
+            value={newSong.artist}
+            onChange={(e) => setNewSong({...newSong, artist: e.target.value})}
+          />
+          <input
+            type="text"
+            className="form-input"
+            style={{ fontSize: "var(--text-sm)" }}
+            placeholder="Tono (Ej. C0 Re)"
+            value={newSong.key}
+            onChange={(e) => setNewSong({...newSong, key: e.target.value})}
+          />
+          <input
+            type="text"
+            className="form-input"
+            style={{ fontSize: "var(--text-sm)" }}
+            placeholder="Notas"
+            value={newSong.notes}
+            onChange={(e) => setNewSong({...newSong, notes: e.target.value})}
+          />
+        </div>
+        <button type="button" onClick={handleAddNewSong} className="btn btn-primary btn-sm" style={{ width: "100%" }}>
+          ➕ Añadir a la lista
         </button>
       </div>
 
+      {/* Tabla de canciones existentes para edición inline */}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "600px" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left" }}>
-              <th style={{ padding: "var(--space-2)", width: "25%" }}>Canción</th>
-              <th style={{ padding: "var(--space-2)", width: "20%" }}>URL (Opcional)</th>
-              <th style={{ padding: "var(--space-2)", width: "20%" }}>Artista</th>
-              <th style={{ padding: "var(--space-2)", width: "15%" }}>Tono</th>
-              <th style={{ padding: "var(--space-2)", width: "15%" }}>Notas</th>
+              <th style={{ padding: "var(--space-2)", width: "25%", fontSize: "var(--text-sm)" }}>Canción</th>
+              <th style={{ padding: "var(--space-2)", width: "20%", fontSize: "var(--text-sm)" }}>URL</th>
+              <th style={{ padding: "var(--space-2)", width: "20%", fontSize: "var(--text-sm)" }}>Artista</th>
+              <th style={{ padding: "var(--space-2)", width: "15%", fontSize: "var(--text-sm)" }}>Tono</th>
+              <th style={{ padding: "var(--space-2)", width: "15%", fontSize: "var(--text-sm)" }}>Notas</th>
               <th style={{ padding: "var(--space-2)", width: "5%" }}></th>
             </tr>
           </thead>
           <tbody>
             {songs.map((song) => (
               <tr key={song.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "var(--space-2)" }}>
+                <td style={{ padding: "var(--space-1)" }}>
                   <input
                     type="text"
                     value={song.name}
                     onChange={(e) => updateSong(song.id, "name", e.target.value)}
                     className="form-input"
-                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)" }}
-                    placeholder="Ej. El último día"
+                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)", border: "none", background: "transparent" }}
                   />
                 </td>
-                <td style={{ padding: "var(--space-2)" }}>
+                <td style={{ padding: "var(--space-1)" }}>
                   <input
                     type="text"
                     value={song.url}
                     onChange={(e) => updateSong(song.id, "url", e.target.value)}
                     className="form-input"
-                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)" }}
-                    placeholder="https://..."
+                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)", border: "none", background: "transparent" }}
                   />
                 </td>
-                <td style={{ padding: "var(--space-2)" }}>
+                <td style={{ padding: "var(--space-1)" }}>
                   <input
                     type="text"
                     value={song.artist}
                     onChange={(e) => updateSong(song.id, "artist", e.target.value)}
                     className="form-input"
-                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)" }}
-                    placeholder="Maldita Nerea"
+                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)", border: "none", background: "transparent" }}
                   />
                 </td>
-                <td style={{ padding: "var(--space-2)" }}>
+                <td style={{ padding: "var(--space-1)" }}>
                   <input
                     type="text"
                     value={song.key}
                     onChange={(e) => updateSong(song.id, "key", e.target.value)}
                     className="form-input"
-                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)" }}
-                    placeholder="C0 Re"
+                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)", border: "none", background: "transparent" }}
                   />
                 </td>
-                <td style={{ padding: "var(--space-2)" }}>
+                <td style={{ padding: "var(--space-1)" }}>
                   <input
                     type="text"
                     value={song.notes}
                     onChange={(e) => updateSong(song.id, "notes", e.target.value)}
                     className="form-input"
-                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)" }}
-                    placeholder="Anotaciones..."
+                    style={{ padding: "var(--space-1)", fontSize: "var(--text-sm)", border: "none", background: "transparent" }}
                   />
                 </td>
-                <td style={{ padding: "var(--space-2)", textAlign: "center" }}>
+                <td style={{ padding: "var(--space-1)", textAlign: "center" }}>
                   <button
                     type="button"
                     onClick={() => deleteSong(song.id)}
@@ -230,8 +294,8 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
             ))}
             {songs.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: "var(--space-4)", textAlign: "center", color: "var(--text-secondary)" }}>
-                  No hay canciones. Añade una para empezar.
+                <td colSpan={6} style={{ padding: "var(--space-4)", textAlign: "center", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+                  La lista está vacía. Añade tu primera canción arriba.
                 </td>
               </tr>
             )}
@@ -239,7 +303,7 @@ export function SongTableEditor({ content, onChange }: SongTableEditorProps) {
         </table>
       </div>
       <p style={{ marginTop: "var(--space-2)", fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>
-        * Al modificar la tabla aquí, el Markdown de abajo se actualiza automáticamente.
+        * Todo lo introducido se guarda automáticamente en el texto Markdown.
       </p>
     </div>
   );
