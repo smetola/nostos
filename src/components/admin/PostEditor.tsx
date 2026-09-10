@@ -5,6 +5,7 @@ import { createPost, updatePost } from "@/lib/actions/posts";
 import type { Topic, Category, Tag, Post, Visibility } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
+import { SongTableEditor } from "./SongTableEditor";
 
 interface Props {
   topics: (Topic & { category: Category })[];
@@ -155,6 +156,7 @@ export default function PostEditor({ topics, tags, existingPost }: Props) {
           {/* Content */}
           <div className="form-group">
             <label className="form-label">Contenido (Markdown)</label>
+            <SongTableEditor content={content} onChange={setContent} />
             <textarea
               className="form-textarea"
               value={content}

@@ -14,3 +14,24 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - Stage changes: `& "C:\Users\ameto\.git-portable\cmd\git.exe" add .`
   - Commit: `& "C:\Users\ameto\.git-portable\cmd\git.exe" commit -m "<commit message>"`
   - Push to remote: `& "C:\Users\ameto\.git-portable\cmd\git.exe" push origin main`
+
+---
+
+
+## Memoria Persistente (Auto-Aprendizaje)
+
+Este archivo es tu **única memoria entre sesiones**. Cada chat nuevo empieza desde cero, así que todo lo que no esté aquí, se pierde.
+
+### Instrucciones
+Cuando durante una sesión de trabajo descubras algo que cumple **todas** estas condiciones:
+1. Es un problema que ya ha causado errores o confusión.
+2. Es algo que **se repetirá** en futuras sesiones si no se documenta.
+3. No es obvio ni trivial (no documentes cosas genéricas de programación).
+
+Entonces **añádelo** a la sección "Lecciones Aprendidas" de abajo, siguiendo este formato:
+- Una línea concisa que describa la regla o el aprendizaje.
+- No repitas reglas que ya existan en otra sección de este archivo.
+- Mantén esta lista corta y útil (máximo ~10 entradas). Si se llena, consolida o elimina las menos relevantes.
+
+### Lecciones Aprendidas
+- **Al completar una tarea o feature que funciona, siempre debes intentar hacer commit y push de los cambios para no perder el progreso.**
